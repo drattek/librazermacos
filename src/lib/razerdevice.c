@@ -144,6 +144,7 @@ bool is_mouse(IOUSBDeviceInterface **usb_dev)
 	case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
     case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
     case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
+	case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:  // Add this line!
 		return true;
 	}
 

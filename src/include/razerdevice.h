@@ -33,6 +33,9 @@
 #define USB_VENDOR_ID_RAZER 0x1532
 #endif
 
+// Add this line with the other USB device ID definitions:
+#define USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED 0x00B9
+
 typedef struct {
     IOUSBDeviceInterface **usbDevice;
     UInt16 productId;
