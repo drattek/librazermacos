@@ -1,0 +1,40 @@
+2025-08-02 01:08:45,321 - INFO - [RazerProtocolAnalyzer] Found PowerShell at: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+2025-08-02 01:08:45,321 - INFO - [RazerProtocolAnalyzer] [START] Starting enhanced protocol monitoring...
+2025-08-02 01:08:45,321 - INFO - [RazerProtocolAnalyzer] [SEARCH] Enhanced Razer device discovery starting...
+2025-08-02 01:08:45,893 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [DEVICE] Found: Razer Basilisk V3 X HyperSpeed (VID_1532&PID_00B9)
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer]    Type: mouse, Features: ['dpi', 'wireless_brightness', 'battery_status']
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [MONITOR] Monitoring 1 Razer devices with protocol analysis
+2025-08-02 01:08:45,894 - INFO - [RazerProtocolAnalyzer] [MONITOR] Starting protocol monitoring for Razer Basilisk V3 X HyperSpeed
+2025-08-02 01:09:11,654 - INFO - [RazerProtocolAnalyzer] [STOP] Stopping monitoring...
+2025-08-02 01:09:11,763 - INFO - [RazerProtocolAnalyzer] [REPORT] Protocol analysis report saved: razer_protocol_analysis_20250802_010911.json
+2025-08-02 01:09:11,763 - INFO - [RazerProtocolAnalyzer] [SUMMARY] Analysis Summary:
+2025-08-02 01:09:11,763 - INFO - [RazerProtocolAnalyzer]    Total packets analyzed: 498
+2025-08-02 01:09:11,763 - INFO - [RazerProtocolAnalyzer]    Razer protocol packets: 498
+2025-08-02 01:09:11,763 - INFO - [RazerProtocolAnalyzer]    Unique commands found: 2
+2025-08-02 01:09:11,763 - INFO - [RazerProtocolAnalyzer]    Devices monitored: 1
