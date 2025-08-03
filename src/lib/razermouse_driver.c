@@ -1699,152 +1699,92 @@ void razer_attr_write_dpi(IOUSBDeviceInterface **usb_dev, ushort dpi_x, ushort d
 
 ssize_t razer_attr_read_get_battery(IOUSBDeviceInterface **usb_dev, char *buf)
 {
-    struct razer_report report = razer_chroma_misc_get_battery_level();
-    struct razer_report response_report = {0};
+    struct razer_report report = {0};
+    struct razer_report response = {0};
+    unsigned char battery_level = 0;
+    
     UInt16 product = -1;
     (*usb_dev)->GetDeviceProduct(usb_dev, &product);
-
-    switch (product)
-    {
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
-            report.transaction_id.id = 0x3f;
-            break;
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE:
-        case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
-        case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
-            report.transaction_id.id = 0x1f;
-            break;
-    }
-    response_report = razer_send_payload(usb_dev, &report);
-    return sprintf(buf, "%d\n", response_report.arguments[1]);
-}
-
-/**
- * Read device file "is_charging"
- *
- * Returns 0 when not charging, 1 when charging
- */
-ssize_t razer_attr_read_is_charging(IOUSBDeviceInterface **usb_dev, char *buf)
-{
-    struct razer_report report = razer_chroma_misc_get_charging_status();
-    struct razer_report response_report = {0};
-    UInt16 product = -1;
-    (*usb_dev)->GetDeviceProduct(usb_dev, &product);
-
+    
     switch(product) {
-    // Wireless mice that don't support is_charging
-    // Use AA batteries
-        case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
-        case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
-            return sprintf(buf, "0\n");
-            break;
-
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
-            report.transaction_id.id = 0x3f;
-            break;
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
-        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
-            report.transaction_id.id = 0x1f;
-            break;
-    }
-
-    response_report = razer_send_payload(usb_dev, &report);
-    return sprintf(buf, "%d\n", response_report.arguments[1]);
-}
-
-/**
- * Read device file "poll_rate"
- *
- * Returns a string
- */
-ushort razer_attr_read_poll_rate(IOUSBDeviceInterface **usb_dev)
-{
-    struct razer_report report = razer_chroma_misc_get_polling_rate();
-    struct razer_report response_report = {0};
-    unsigned short polling_rate = 0;
-
-    UInt16 product = -1;
-    (*usb_dev)->GetDeviceProduct(usb_dev, &product);
-    switch(product) {
-        case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
-            switch(da3_5g.poll) {
-                case 0x01:
-                    polling_rate = 1000;
-                    break;
-                case 0x02:
-                    polling_rate = 500;
-                    break;
-                case 0x03:
-                    polling_rate = 125;
-                    break;
+        case USB_DEVICE_ID_RAZER_BASILISK_V3_X_HYPERSPEED:
+            // Create battery level request based on captured packet: 001f05000100ff00...
+            report.status = 0x00;                    // Standard status
+            report.transaction_id.id = 0x1F;         // Host to device transaction  
+            report.remaining_packets = 0x00;         // Single packet
+            report.protocol_type = 0x05;             // Battery protocol type
+            report.data_size = 0x05;                 // 5 bytes of data
+            report.command_class = 0x05;             // Battery command class (0x05)
+            report.command_id.id = 0x01;             // Get battery level command (0x01)
+            
+            // Clear arguments (battery query has no input parameters)
+            memset(&report.arguments, 0, sizeof(report.arguments));
+            
+            // Send the request and get response
+            response = razer_send_payload(usb_dev, &report);
+            
+            // Check if command was successful
+            if (response.status != RAZER_CMD_SUCCESSFUL) {
+                printf("razermouse: Failed to get battery level for Basilisk V3 X HyperSpeed (status: 0x%02X)\n", response.status);
+                return sprintf(buf, "-1\n");
             }
-            return polling_rate;
-            break;
-
-        case USB_DEVICE_ID_RAZER_NAGA_HEX_V2:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
-        case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
+            
+            // Extract battery level from response payload
+            // Based on captured data: ff00 = battery_level(0xFF), charging_status(0x00)
+            battery_level = response.arguments[0];
+            
+            // Validate battery level range (0-255, where 255 = 100%)
+            if (battery_level > 255) {
+                printf("razermouse: Invalid battery level received from Basilisk V3 X HyperSpeed: %d\n", battery_level);
+                return sprintf(buf, "-1\n");
+            }
+            
+            // Return battery level as string (0-255 range, OpenRazer standard)
+            return sprintf(buf, "%d\n", battery_level);
+            
         case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_RECEIVER:
         case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS_WIRED:
+        case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
         case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_RECEIVER:
         case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS_WIRED:
-        case USB_DEVICE_ID_RAZER_BASILISK:
-        case USB_DEVICE_ID_RAZER_BASILISK_ESSENTIAL:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRED:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_PRO_WIRELESS:
-        case USB_DEVICE_ID_RAZER_DEATHADDER_V2_MINI:
-            report.transaction_id.id = 0x3f;
+        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE_RECEIVER:
+        case USB_DEVICE_ID_RAZER_BASILISK_ULTIMATE:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS:
+        case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED:
+            // Standard wireless mouse battery request
+            report = razer_chroma_misc_get_battery_level();
+            report.transaction_id.id = 0x1f;
+            response = razer_send_payload(usb_dev, &report);
+            
+            if (response.status == RAZER_CMD_SUCCESSFUL) {
+                battery_level = response.arguments[1];
+                return sprintf(buf, "%d\n", battery_level);
+            } else {
+                printf("razermouse: Failed to get battery level (status: 0x%02X)\n", response.status);
+                return sprintf(buf, "-1\n");
+            }
             break;
-
-        case USB_DEVICE_ID_RAZER_NAGA_LEFT_HANDED_2020:
+            
         case USB_DEVICE_ID_RAZER_ATHERIS_RECEIVER:
-        case USB_DEVICE_ID_RAZER_BASILISK_V2:
-        case USB_DEVICE_ID_RAZER_BASILISK_V3:
         case USB_DEVICE_ID_RAZER_OROCHI_V2_RECEIVER:
         case USB_DEVICE_ID_RAZER_OROCHI_V2_BLUETOOTH:
-            report.transaction_id.id = 0x1f;
+            // Atheris/Orochi series battery request
+            report = razer_chroma_misc_get_battery_level();
+            response = razer_send_payload(usb_dev, &report);
+            
+            if (response.status == RAZER_CMD_SUCCESSFUL) {
+                battery_level = response.arguments[1];
+                return sprintf(buf, "%d\n", battery_level);
+            } else {
+                printf("razermouse: Failed to get battery level for Atheris/Orochi (status: 0x%02X)\n", response.status);
+                return sprintf(buf, "-1\n");
+            }
             break;
+            
+        default:
+            printf("razermouse: get_battery not supported for this model (PID: 0x%04X)\n", product);
+            return sprintf(buf, "-1\n");
     }
-
-    if(product == USB_DEVICE_ID_RAZER_OROCHI_2011) {
-        response_report.arguments[0] = orochi2011_poll;
-    } else {
-        response_report = razer_send_payload(usb_dev, &report);
-    }
-
-    switch(response_report.arguments[0]) {
-        case 0x01:
-            polling_rate = 1000;
-            break;
-        case  0x02:
-            polling_rate = 500;
-            break;
-        case  0x08:
-            polling_rate = 125;
-            break;
-    }
-
-    return polling_rate;
 }
 
 void deathadder3_5g_set_poll_rate(IOUSBDeviceInterface **usb_dev, unsigned short poll_rate)

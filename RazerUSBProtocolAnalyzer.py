@@ -582,6 +582,138 @@ class RazerProtocolAnalyzer:
         except Exception as e:
             self.logger.error(f"Failed to save protocol report: {e}")
 
+    def setup_battery_packet_filter(self):
+        """Setup real-time battery packet filtering"""
+        self.battery_packet_buffer = []
+        self.battery_packet_stats = {
+            'total_detected': 0,
+            'by_type': defaultdict(int),
+            'patterns_detected': 0,
+            'last_battery_level': None,
+            'last_charging_status': None
+        }
+
+    def process_realtime_battery_packet(self, packet_data, timestamp):
+        """Process battery packet in real-time"""
+        is_battery, packet_type = self.is_battery_packet(packet_data)
+        
+        if not is_battery:
+            return None
+        
+        # Update statistics
+        self.battery_packet_stats['total_detected'] += 1
+        self.battery_packet_stats['by_type'][packet_type] += 1
+        
+        # Perform detailed analysis
+        analysis = self.analyze_battery_packet_structure(packet_data, packet_type)
+        
+        # Add to buffer for pattern detection
+        self.battery_packet_buffer.append({
+            'timestamp': timestamp,
+            'data': packet_data,
+            'analysis': analysis
+        })
+        
+        # Keep buffer manageable
+        if len(self.battery_packet_buffer) > 100:
+            self.battery_packet_buffer.pop(0)
+        
+        # Log significant battery events
+        if analysis['battery_data']:
+            self.log_battery_event(analysis)
+        
+        # Detect patterns every 10 packets
+        if self.battery_packet_stats['total_detected'] % 10 == 0:
+            patterns = self.detect_battery_packet_patterns(self.battery_packet_buffer)
+            if patterns['periodic_queries'] or patterns['value_trends']:
+                self.battery_packet_stats['patterns_detected'] += 1
+                self.logger.info(f"[BATTERY] Pattern detected: {patterns}")
+        
+        return analysis
+
+    def log_battery_event(self, analysis):
+        """Log significant battery-related events"""
+        battery_data = analysis['battery_data']
+        
+        if 'battery_level_percent' in battery_data:
+            level = battery_data['battery_level_percent']
+            last_level = self.battery_packet_stats['last_battery_level']
+            
+            if last_level is None or abs(level - last_level) >= 5:
+                self.logger.info(f"[BATTERY] Level change: {last_level}% → {level}%")
+                self.battery_packet_stats['last_battery_level'] = level
+        
+        if 'charging_status' in battery_data:
+            status = battery_data['charging_status']
+            last_status = self.battery_packet_stats['last_charging_status']
+            
+            if status != last_status:
+                self.logger.info(f"[BATTERY] Status change: {last_status} → {status}")
+                self.battery_packet_stats['last_charging_status'] = status
+                
+    def run_comprehensive_capture(self, duration_seconds=300):
+        """
+        Captures all device traffic for a set duration, then saves to a file.
+        This provides a complete data dump for reverse engineering.
+        """
+        start_time = time.time()
+        end_time = start_time + duration_seconds
+        capture_filename = f"comprehensive_capture_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        analysis_filename = f"analysis_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        
+        all_packets = []  # List to store raw packet data
+        all_analyses = [] # List to store analysis objects
+        
+        self.find_razer_devices_enhanced()
+        
+        print(f"\nRunning capture for {duration_seconds} seconds...")
+        
+        while time.time() < end_time:
+            # Generate or capture real packet data
+            for device_key, device_info in self.devices.items():
+                sample_packets = self._generate_sample_packets(device_info) # SIMULATED packet generation
+
+                for packet_data in sample_packets:
+                    raw_data = packet_data.hex() if isinstance(packet_data, bytes) else str(packet_data)
+                    all_packets.append(f"{datetime.now().isoformat()} - {raw_data}")
+
+                    # Analyze and save analysis object
+                    analysis = self.analyze_razer_packet(packet_data, device_info)
+                    if analysis:
+                        all_analyses.append(analysis)
+            time.sleep(0.1)
+            
+        # Save ALL captured data to a single text file
+        try:
+            with open(capture_filename, "w") as f:
+                f.write("\n".join(all_packets))
+            self.logger.info(f"Raw capture data saved to: {capture_filename}")
+        except Exception as e:
+            self.logger.error(f"Error saving raw capture data: {e}")
+            
+        # Generate basic analysis
+        report = {
+            'analysis_metadata': {
+                'timestamp': datetime.now().isoformat(),
+                'total_packets': len(all_analyses),
+                'devices_monitored': list(self.devices.keys())
+            },
+            'devices': self.devices,
+            'raw_packets': all_analyses
+        }
+        
+        try:
+            with open(analysis_filename, 'w') as f:
+                json.dump(report, f, indent=2, default=str)
+            self.logger.info(f"[REPORT] Simplified capture analysis report saved: {analysis_filename}")
+        except Exception as e:
+            self.logger.error(f"Error saving simplified analysis: {e}")
+            
+        return {
+            "raw_capture": capture_filename,
+            "analysis_report": analysis_filename
+        }
+
 def main():
     """Main entry point for enhanced Razer protocol analysis"""
     print("[ANALYZER] Enhanced Razer USB Protocol Analyzer")
@@ -601,4 +733,21 @@ def main():
     print("[SUCCESS] Analysis complete. Check the generated report file.")
 
 if __name__ == "__main__":
-    main()
+    analyzer = RazerProtocolAnalyzer()
+    
+    # Run comprehensive capture for 5 minutes
+    print("Starting comprehensive packet capture...")
+    print("This will capture ALL traffic from your Razer device")
+    print("Try these actions while capturing:")
+    print("- Move the mouse")
+    print("- Change DPI settings")
+    print("- Plug/unplug USB cable")
+    print("- Open Razer Synapse")
+    print("- Let battery drain/charge")
+    
+    exported = analyzer.run_comprehensive_capture(duration_seconds=300)
+    
+    if exported:
+        print(f"\nCapture complete! Files saved:")
+        for file_type, filename in exported.items():
+            print(f"  {file_type}: {filename}")
